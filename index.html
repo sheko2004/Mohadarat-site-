@@ -1,0 +1,24 @@
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تدوين المحاضرات</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>محاضراتي</h1>
+    </header>
+    <main>
+        <section id="lecture-form">
+            <h2>أضف محاضرة جديدة</h2>
+            <input type="text" id="lecture-title" placeholder="عنوان المحاضرة">
+            <textarea id="lecture-content" placeholder="محتوى المحاضرة"></textarea>
+            <button onclick="addLecture()">إضافة</button>
+        </section>
+        <section id="lectures">
+            <h2>قائمة المحاضرات</h2>
+            <ul id="lecture-list"></ul>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
