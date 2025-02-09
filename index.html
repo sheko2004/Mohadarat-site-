@@ -3,51 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل الدخول</title>
+    <title>موقع المحاضرات</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h2>تسجيل الدخول</h2>
-    
-    <!-- نموذج تسجيل الدخول -->
-    <div id="login-form">
-        <input type="text" id="username" placeholder="اسم المستخدم">
-        <input type="password" id="password" placeholder="كلمة المرور">
-        <button onclick="login()">تسجيل الدخول</button>
-    </div>
 
-    <!-- المحتوى الذي يظهر بعد تسجيل الدخول -->
-    <div id="dashboard" style="display:none;">
-        <h2>مرحبًا بك في لوحة التحكم</h2>
-        <p>التحديثات الحالية:</p>
-        <ul id="updates">
-            <li>تحديث 1</li>
-            <li>تحديث 2</li>
-            <li>تحديث 3</li>
+    <header>
+        <h1>موقع المحاضرات</h1>
+        <nav>
+            <ul>
+                <li><a href="#home">الرئيسية</a></li>
+                <li><a href="#upload">رفع المحاضرات</a></li>
+                <li><a href="#courses">المحاضرات</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="home">
+        <h2>مرحبًا بك في موقع المحاضرات</h2>
+        <p>يمكنك هنا تحميل المحاضرات وتنظيمها للوصول إليها في أي وقت.</p>
+    </section>
+
+    <section id="upload">
+        <h2>رفع المحاضرات</h2>
+        <input type="file" id="fileUpload" accept=".pdf,.docx,.ppt,.txt">
+        <button onclick="uploadFile()">رفع</button>
+    </section>
+
+    <section id="courses">
+        <h2>قائمة المحاضرات</h2>
+        <ul id="lectureList">
+            <!-- سيتم عرض المحاضرات هنا -->
         </ul>
-        <button onclick="logout()">تسجيل الخروج</button>
-    </div>
+    </section>
 
-    <script>
-        function login() {
-            const username = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
-
-            // يمكنك هنا إضافة التحقق من البيانات (مثلاً عبر API أو قاعدة بيانات)
-            if (username === "admin" && password === "password123") {
-                // إخفاء نموذج تسجيل الدخول وعرض لوحة التحكم
-                document.getElementById("login-form").style.display = "none";
-                document.getElementById("dashboard").style.display = "block";
-            } else {
-                alert("اسم المستخدم أو كلمة المرور غير صحيحة.");
-            }
-        }
-
-        function logout() {
-            // إخفاء لوحة التحكم وإظهار نموذج تسجيل الدخول مجددًا
-            document.getElementById("login-form").style.display = "block";
-            document.getElementById("dashboard").style.display = "none";
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
-    </html>
+</html>
