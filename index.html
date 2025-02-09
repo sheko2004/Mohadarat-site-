@@ -25,6 +25,12 @@
     <button onclick="uploadFile()">رفع</button>
   </section>
 
+  <!-- عرض المحاضرات المخزنة في Firebase -->
+  <section id="lectures">
+    <h2>قائمة المحاضرات</h2>
+    <ul id="lectureList"></ul>
+  </section>
+
   <script>
     // إعدادات Firebase الخاصة بتطبيقك
     const firebaseConfig = {
@@ -79,6 +85,7 @@
                 console.error('Error saving data: ', error);
               } else {
                 console.log('Lecture data saved successfully');
+                loadLectures(); // إعادة تحميل قائمة المحاضرات
               }
             });
           });
@@ -87,6 +94,29 @@
         alert('يرجى اختيار ملف لرفعه');
       }
     }
+
+    // جلب البيانات من Firebase وعرض المحاضرات
+    function loadLectures() {
+      const lectureList = document.getElementById('lectureList');
+
+      // جلب البيانات من Firebase Realtime Database
+      const lecturesRef = database.ref('lectures');
+      lecturesRef.on('value', (snapshot) => {
+        lectureList.innerHTML = '';  // مسح القائمة الحالية
+
+        snapshot.forEach((childSnapshot) => {
+          const lectureData = childSnapshot.val();
+
+          // إنشاء عنصر li لعرض المحاضرة
+          const li = document.createElement('li');
+          li.innerHTML = <a href="${lectureData.url}" target="_blank">${lectureData.name}</a> - تم الرفع في: ${lectureData.dateUploaded};
+          lectureList.appendChild(li);
+        });
+      });
+    }
+
+    // استدعاء دالة loadLectures عند تحميل الصفحة
+    window.onload = loadLectures;
   </script>
 
 </body>
