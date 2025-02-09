@@ -3,11 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محاضراتي</title>
+    <title>تسجيل الدخول</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>مرحبًا بك في موقع محاضراتي</h1>
-    <p>هنا يمكنك تدوين ومشاركة محاضراتك بسهولة.</p>
+    <h2>تسجيل الدخول</h2>
+    
+    <!-- نموذج تسجيل الدخول -->
+    <div id="login-form">
+        <input type="text" id="username" placeholder="اسم المستخدم">
+        <input type="password" id="password" placeholder="كلمة المرور">
+        <button onclick="login()">تسجيل الدخول</button>
+    </div>
+
+    <!-- المحتوى الذي يظهر بعد تسجيل الدخول -->
+    <div id="dashboard" style="display:none;">
+        <h2>مرحبًا بك في لوحة التحكم</h2>
+        <p>التحديثات الحالية:</p>
+        <ul id="updates">
+            <li>تحديث 1</li>
+            <li>تحديث 2</li>
+            <li>تحديث 3</li>
+        </ul>
+        <button onclick="logout()">تسجيل الخروج</button>
+    </div>
+
+    <script>
+        function login() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            // يمكنك هنا إضافة التحقق من البيانات (مثلاً عبر API أو قاعدة بيانات)
+            if (username === "admin" && password === "password123") {
+                // إخفاء نموذج تسجيل الدخول وعرض لوحة التحكم
+                document.getElementById("login-form").style.display = "none";
+                document.getElementById("dashboard").style.display = "block";
+            } else {
+                alert("اسم المستخدم أو كلمة المرور غير صحيحة.");
+            }
+        }
+
+        function logout() {
+            // إخفاء لوحة التحكم وإظهار نموذج تسجيل الدخول مجددًا
+            document.getElementById("login-form").style.display = "block";
+            document.getElementById("dashboard").style.display = "none";
+        }
+    </script>
 </body>
-</html>
+    </html>
