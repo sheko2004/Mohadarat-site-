@@ -1,109 +1,89 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>موقع المحاضرات</title>
-    <!-- رابط إلى ملف CSS (إذا كان لديك) -->
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>موقع المحاضرات</title>
+  <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-storage.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-database.js"></script>
 </head>
 <body>
-    <header>
-        <h1>موقع المحاضرات</h1>
-    </header>
+  <section id="upload">
+    <h2>رفع المحاضرات</h2>
+    <input type="file" id="fileUpload" accept=".pdf">
+    <button onclick="uploadFile()">رفع</button>
+  </section>
 
-    <!-- قسم رفع المحاضرات -->
-    <section id="upload">
-        <h2>رفع المحاضرات</h2>
-        <!-- حقل لاختيار الملف من نوع PDF -->
-        <input type="file" id="fileUpload" accept=".pdf">
-        <button onclick="uploadFile()">رفع</button>
-    </section>
+  <section id="lectures">
+    <h2>قائمة المحاضرات</h2>
+    <ul id="lectureList"></ul>
+  </section>
 
-    <!-- قسم عرض المحاضرات -->
-    <section id="lectures">
-        <h2>قائمة المحاضرات</h2>
-        <ul id="lectureList"></ul>
-    </section>
+  <script>
+    // Firebase setup
+    const firebaseConfig = {
+      apiKey: "AIzaSyCtF7o227TO-NjmtuChXo0dcQ1cjFBLToA",
+      authDomain: "lecturswebsite.firebaseapp.com",
+      projectId: "lecturswebsite",
+      storageBucket: "lecturswebsite.firebasestorage.app",
+      messagingSenderId: "391582571023",
+      appId: "1:391582571023:web:0bf2ceab336f3a780f217a",
+      measurementId: "G-0R6NWV7E5D"
+    };
 
-    <!-- رابط إلى مكتبات Firebase (تأكد من استخدام الإصدارات الصحيحة) -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
+    const database = getDatabase(app);
 
-    <!-- الكود الخاص بـ Firebase -->
-    <script>
-        // تهيئة Firebase باستخدام إعدادات المشروع
-        const firebaseConfig = {
-            apiKey: "AIzaSyCtF7o227TO-NjmtuChXo0dcQ1cjFBLToA",
-            authDomain: "lecturswebsite.firebaseapp.com",
-            projectId: "lecturswebsite",
-            storageBucket: "lecturswebsite.appspot.com",
-            messagingSenderId: "391582571023",
-            appId: "1:391582571023:web:0bf2ceab336f3a780f217a",
-            measurementId: "G-0R6NWV7E5D"
-        };
+    // رفع الملف إلى Firebase Storage
+    function uploadFile() {
+      const file = document.getElementById('fileUpload').files[0];
+      if (file) {
+        const storageRef = ref(storage, 'lectures/' + file.name);
+        
+        const uploadTask = uploadBytesResumable(storageRef, file);
 
-        // تهيئة تطبيق Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const storage = firebase.storage();
-        const database = firebase.database();
+        uploadTask.on('state_changed', (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log('Upload is ' + progress + '% done');
+        }, (error) => {
+          console.error('Error uploading file:', error.message);
+        }, () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            console.log('File available at', downloadURL);
 
-        // دالة لرفع الملف
-        function uploadFile() {
-            const file = document.getElementById('fileUpload').files[0];
-            if (!file) {
-                alert("يرجى اختيار ملف");
-                return;
-            }
-
-            // إنشاء مرجع إلى Firebase Storage
-            const storageRef = storage.ref('lectures/' + file.name);
-
-            // رفع الملف إلى Firebase Storage
-            storageRef.put(file).then((snapshot) => {
-                alert("تم رفع الملف بنجاح!");
-                saveLectureData(file.name);
-            }).catch((error) => {
-                alert("حدث خطأ أثناء رفع الملف");
-                console.error(error);
+            const lecturesRef = ref(database, 'lectures');
+            const newLectureRef = push(lecturesRef);
+            set(newLectureRef, {
+              name: file.name,
+              url: downloadURL,
+              dateUploaded: new Date().toLocaleString()
             });
-        }
+          });
+        });
+      }
+    }
 
-        // دالة لحفظ بيانات المحاضرة في Firebase Realtime Database
-        function saveLectureData(fileName) {
-            const lectureData = {
-                name: fileName,
-                dateUploaded: new Date().toLocaleString(),
-                url: https://firebasestorage.googleapis.com/v0/b/${app.options.storageBucket}/o/lectures%2F${fileName}?alt=media
-            };
+    // جلب البيانات من Firebase وعرض المحاضرات
+    function loadLectures() {
+      const lectureList = document.getElementById('lectureList');
+      const lecturesRef = ref(database, 'lectures');
+      
+      onValue(lecturesRef, (snapshot) => {
+        lectureList.innerHTML = '';  // مسح القائمة الحالية
 
-            // مرجع إلى Realtime Database
-            const lecturesRef = database.ref('lectures');
-            lecturesRef.push(lectureData);
-        }
+        snapshot.forEach((childSnapshot) => {
+          const lectureData = childSnapshot.val();
 
-        // دالة لعرض المحاضرات من Firebase
-        function loadLectures() {
-            const lectureList = document.getElementById('lectureList');
+          const li = document.createElement('li');
+          li.innerHTML = <a href="${lectureData.url}" target="_blank">${lectureData.name}</a> - تم الرفع في: ${lectureData.dateUploaded};
+          lectureList.appendChild(li);
+        });
+      });
+    }
 
-            const lecturesRef = database.ref('lectures');
-            lecturesRef.on('value', (snapshot) => {
-                lectureList.innerHTML = '';  // مسح القائمة الحالية
-
-                snapshot.forEach((childSnapshot) => {
-                    const lectureData = childSnapshot.val();
-
-                    // إنشاء عنصر li لعرض المحاضرة
-                    const li = document.createElement('li');
-                    li.innerHTML = <a href="${lectureData.url}" target="_blank">${lectureData.name}</a> - تم الرفع في: ${lectureData.dateUploaded};
-                    lectureList.appendChild(li);
-                });
-            });
-        }
-
-        // استدعاء دالة loadLectures عند تحميل الصفحة
-        window.onload = loadLectures;
-    </script>
+    window.onload = loadLectures;
+  </script>
 </body>
 </html>
