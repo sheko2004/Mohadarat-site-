@@ -1,21 +1,62 @@
-// دالة لإضافة محاضرة جديدة
-function addLecture() {
-    // الحصول على اسم المحاضرة من المستخدم
-    let lectureName = document.getElementById("lectureName").value;
-    
-    // التحقق من أن المستخدم أدخل اسم المحاضرة
-    if (lectureName === "") {
-        alert("الرجاء إدخال اسم المحاضرة.");
+// استيراد Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+import { getDatabase, ref as dbRef, push, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+// تهيئة Firebase
+const firebaseConfig = {
+    apiKey: "API_KEY",  
+    authDomain: "PROJECT_ID.firebaseapp.com",
+    projectId: "PROJECT_ID",
+    storageBucket: "PROJECT_ID.appspot.com",
+    messagingSenderId: "SENDER_ID",
+    appId: "APP_ID",
+    measurementId: "MEASUREMENT_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const storage = getStorage(app);
+const database = getDatabase(app);
+
+// وظيفة رفع الملف
+function uploadFile() {
+    const file = document.getElementById("fileUpload").files[0];
+    if (!file) {
+        alert("يرجى اختيار ملف!");
         return;
     }
-    
-    // إنشاء عنصر <li> جديد
-    let li = document.createElement("li");
-    li.textContent = lectureName;
-    
-    // إضافة العنصر الجديد إلى قائمة المحاضرات
-    document.getElementById("lectureList").appendChild(li);
-    
-    // مسح الحقل بعد إضافة المحاضرة
-    document.getElementById("lectureName").value = "";
+
+    const storageRef = ref(storage, 'lectures/' + file.name);
+    uploadBytes(storageRef, file).then((snapshot) => {
+        getDownloadURL(snapshot.ref).then((downloadURL) => {
+            const lectureRef = push(dbRef(database, 'lectures'));
+            set(lectureRef, {
+                name: file.name,
+                url: downloadURL,
+                dateUploaded: new Date().toLocaleString()
+            });
+            alert("تم الرفع بنجاح!");
+            loadLectures();
+        });
+    }).catch((error) => {
+        console.error("خطأ في رفع الملف:", error);
+    });
 }
+
+// وظيفة تحميل قائمة المحاضرات
+function loadLectures() {
+    const lectureList = document.getElementById("lectureList");
+    lectureList.innerHTML = "";
+
+    onValue(dbRef(database, 'lectures'), (snapshot) => {
+        snapshot.forEach((childSnapshot) => {
+            const lectureData = childSnapshot.val();
+            const li = document.createElement('li');
+            li.innerHTML = <a href="${lectureData.url}" target="_blank">${lectureData.name}</a> - تم الرفع في: ${lectureData.dateUploaded};
+            lectureList.appendChild(li);
+        });
+    });
+}
+
+// تحميل المحاضرات عند فتح الصفحة
+window.onload = loadLectures;
