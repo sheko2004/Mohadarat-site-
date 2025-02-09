@@ -1,27 +1,21 @@
-function uploadFile() {
-    const fileInput = document.getElementById('fileUpload');
-    const file = fileInput.files[0];
+// دالة لإضافة محاضرة جديدة
+function addLecture() {
+    // الحصول على اسم المحاضرة من المستخدم
+    let lectureName = document.getElementById("lectureName").value;
     
-    if (file) {
-        const lectureList = document.getElementById('lectureList');
-        
-        // إنشاء عنصر قائمة جديد لإظهار الملف
-        const listItem = document.createElement('li');
-        listItem.textContent = المحاضرة: ${file.name};
-
-        // إضافة رابط لتحميل الملف (افتراضيًا لا يوجد خادم، فقط محليًا)
-        const downloadLink = document.createElement('a');
-        downloadLink.href = URL.createObjectURL(file);
-        downloadLink.textContent = "تحميل";
-        downloadLink.target = "_blank";
-        listItem.appendChild(downloadLink);
-        
-        // إضافة المحاضرة إلى القائمة
-        lectureList.appendChild(listItem);
-
-        // إفراغ الحقل بعد رفع الملف
-        fileInput.value = '';
-    } else {
-        alert("الرجاء اختيار ملف");
+    // التحقق من أن المستخدم أدخل اسم المحاضرة
+    if (lectureName === "") {
+        alert("الرجاء إدخال اسم المحاضرة.");
+        return;
     }
+    
+    // إنشاء عنصر <li> جديد
+    let li = document.createElement("li");
+    li.textContent = lectureName;
+    
+    // إضافة العنصر الجديد إلى قائمة المحاضرات
+    document.getElementById("lectureList").appendChild(li);
+    
+    // مسح الحقل بعد إضافة المحاضرة
+    document.getElementById("lectureName").value = "";
 }
